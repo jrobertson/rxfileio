@@ -3,7 +3,7 @@
 # file: rxfileio.rb
 
 require 'rxfreadwrite'
-require 'dir-to-xml'
+require 'drb_fileclient'
 require 'mymedia_ftp'
 
 

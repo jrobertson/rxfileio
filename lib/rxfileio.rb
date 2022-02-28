@@ -11,42 +11,13 @@ require 'mymedia_ftp'
 module RXFileIOModule
   include RXFReadWriteModule
 
-  def DirX.chdir(s)  RXFileIO.chdir(s)   end
-  def DirX.mkdir(s)  RXFileIO.mkdir(s)   end
-  def DirX.pwd()     RXFileIO.pwd()      end
-
-  def FileX.chdir(s)  RXFileIO.chdir(s)  end
-
-  def FileX.directory?(filename)
-
-    type = FileX.filetype(filename)
-
-    filex = case type
-    when :file
-      File
-    when :dfs
-      DfsFile
-    else
-      nil
-    end
-
-    return nil unless filex
-
-    filex.directory? filename
-
-  end
-
-  def FileX.exist?(filename)
-    exists? filename
-  end
-
+  def FileX.exist?(filename) exists? filename     end
   def FileX.chmod(num, s) RXFileIO.chmod(num, s)  end
   def FileX.cp(s, s2)     RXFileIO.cp(s, s2)      end
   def FileX.ls(s)         RXFileIO.ls(s)          end
   def FileX.mkdir(s)      RXFileIO.mkdir(s)       end
   def FileX.mkdir_p(s)    RXFileIO.mkdir_p(s)     end
   def FileX.mv(s, s2)     RXFileIO.mv(s, s2)      end
-  def FileX.pwd()         RXFileIO.pwd()          end
   def FileX.read(x)       RXFileIO.read(x).first  end
   def FileX.rm(s)         RXFileIO.rm(s)          end
 
@@ -73,14 +44,13 @@ end
 class RXFileIO < RXFReadWrite
   using ColouredText
 
-  @fs = :local
 
   def self.chmod(permissions, s)
 
     return unless permissions.is_a? Integer
     return unless s.is_a? String
 
-    if s[/^dfs:\/\//] or @fs[0..2] == 'dfs' then
+    if s[/^dfs:\/\//] or @@fs[0..2] == 'dfs' then
       DfsFile.chmod permissions, s
     else
       FileUtils.chmod permissions, s
@@ -112,27 +82,7 @@ class RXFileIO < RXFReadWrite
     end
   end
 
-  def self.chdir(x)
 
-    # We can use @fs within chdir() to flag the current file system.
-    # Allowing us to use relative paths with FileX operations instead
-    # of explicitly stating the path each time. e.g. touch 'foo.txt'
-    #
-
-    if x[/^file:\/\//] or File.exists?(File.dirname(x)) then
-
-      @fs = :local
-      FileUtils.chdir x
-
-    elsif x[/^dfs:\/\//]
-
-      host = x[/(?<=dfs:\/\/)[^\/]+/]
-      @fs = 'dfs://' + host
-      DfsFile.chdir x
-
-    end
-
-  end
 
   def self.ls(x='*')
 
@@ -151,19 +101,9 @@ class RXFileIO < RXFReadWrite
 
   end
 
-  def self.mkdir(x)
-
-    if x[/^file:\/\//] or File.exists?(File.dirname(x)) then
-      FileUtils.mkdir x
-    elsif x[/^dfs:\/\//]
-      DfsFile.mkdir x
-    end
-
-  end
-
   def self.mkdir_p(x)
 
-    if x[/^dfs:\/\//] or @fs[0..2] == 'dfs' then
+    if x[/^dfs:\/\//] or @@fs[0..2] == 'dfs' then
       DfsFile.mkdir_p x
     else
       FileUtils.mkdir_p x
@@ -173,13 +113,6 @@ class RXFileIO < RXFReadWrite
 
   def self.mv(s1, s2)
     DfsFile.mv(s1, s2)
-  end
-
-
-  def self.pwd()
-
-    DfsFile.pwd
-
   end
 
   def self.read(x, h={})
@@ -347,8 +280,8 @@ class RXFileIO < RXFReadWrite
 
   def self.touch(filename, mtime: Time.now)
 
-    if @fs[0..2] == 'dfs' then
-      return DfsFile.touch(@fs + pwd + '/' + filename, mtime: mtime)
+    if @@fs[0..2] == 'dfs' then
+      return DfsFile.touch(@@fs + pwd + '/' + filename, mtime: mtime)
     end
 
     case filename[/^\w+(?=:\/\/)/]

@@ -11,7 +11,7 @@ require 'mymedia_ftp'
 module RXFileIOModule
   include RXFReadWriteModule
 
-  def FileX.exist?(filename) exists? filename     end
+  def FileX.exist?(filename) exist?(filename)     end
   def FileX.chmod(num, s) RXFileIO.chmod(num, s)  end
   def FileX.cp(s, s2)     RXFileIO.cp(s, s2)      end
   def FileX.ls(s)         RXFileIO.ls(s)          end
@@ -86,7 +86,7 @@ class RXFileIO < RXFReadWrite
 
   def self.ls(x='*')
 
-    return Dir[x] if File.exists?(File.dirname(x))
+    return Dir[x] if File.exist?(File.dirname(x))
 
     case x[/^\w+(?=:\/\/)/]
     when 'file'
@@ -164,7 +164,7 @@ class RXFileIO < RXFReadWrite
 
         [MyMediaFTP.read(x), :ftp]
 
-      elsif x[/^file:\/\//] or File.exists?(x) then
+      elsif x[/^file:\/\//] or File.exist?(x) then
 
         contents = File.read(File.expand_path(x.sub(%r{^file://}, '')))
 
@@ -324,7 +324,7 @@ class RXFileIO < RXFReadWrite
 
     if not source =~ /:\/\// then
 
-      return true if File.exists? source
+      return true if File.exist? source
 
     else
 

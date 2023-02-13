@@ -11,7 +11,7 @@ require 'mymedia_ftp'
 module RXFileIOModule
   include RXFReadWriteModule
 
-  def FileX.exist?(filename) exist?(filename)     end
+  def FileX.exist?(filename) RXFileIO.exist?(filename)     end
   def FileX.chmod(num, s) RXFileIO.chmod(num, s)  end
   def FileX.cp(s, s2)     RXFileIO.cp(s, s2)      end
   def FileX.ls(s)         RXFileIO.ls(s)          end
